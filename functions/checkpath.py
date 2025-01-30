@@ -1,32 +1,20 @@
 import os
 
 def check_path(concat):
-    if os.path.isdir(concat + "/" + "Pump-Station"):
-        print("we in pump")
-        pump = 1
-    else:
-        print("pump folder not found")
-        pump = 0
+    try:
+        pump = 1 if os.path.isdir(os.path.join(concat, "Pump-Station")) else 0
+        pressure = 1 if os.path.isdir(os.path.join(concat, "Pressurized-Pipe")) else 0
+        gravity = 1 if os.path.isdir(os.path.join(concat, "Wastewater")) else 0
+        excel = 1 if os.path.isdir(os.path.join(concat, "Excel")) else 0
 
-    if os.path.isdir(concat + "/" + "Pressurized-Pipe"):
-        print("we in pressure")
-        pressure = 1
-    else:
-        print("pressure folder not found")
-        pressure = 0
+        # Debugging prints
+        print("Pump-Station:", "Found" if pump else "Not Found")
+        print("Pressurized-Pipe:", "Found" if pressure else "Not Found")
+        print("Wastewater:", "Found" if gravity else "Not Found")
+        print("Excel:", "Found" if excel else "Not Found")
 
-    if os.path.isdir(concat + "/" + "Wastewater"):
-        print("we in gravity")
-        gravity = 1
-    else:
-        print("gravity folder not found")
-        gravity = 0
+        return pump, pressure, gravity, excel
 
-    if os.path.isdir(concat + "/" + "Excel"):
-        print("we in Excel")
-        excel = 1
-    else:
-        print("Excel not found")
-        excel = 0
-
-    return pump, pressure, gravity, excel
+    except Exception as e:
+        print(f"Error checking path: {concat}. Exception: {str(e)}")
+        return 0, 0, 0, 0  # Default return in case of an error
