@@ -2,8 +2,9 @@ from email import header
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from win32com import client
+from functions.input_dialog import InputDialog
 from PyQt5.QtCore import QAbstractTableModel, QModelIndex,Qt
-from PyQt5.QtWidgets import QComboBox, QItemDelegate,QMessageBox,QInputDialog,QWidget
+from PyQt5.QtWidgets import QComboBox, QItemDelegate,QMessageBox,QInputDialog,QWidget,QDialog
 import shutil
 import time
 import pandas as pd
@@ -13,7 +14,6 @@ import functions.word as word
 import functions.mail as mail
 import os
 import pythoncom
-
 # Creates the model for the QTableView
 class PandasModel(QAbstractTableModel):
     def __init__(self, data):
@@ -54,6 +54,11 @@ class PandasModel(QAbstractTableModel):
                     and value == "Removed"
                 ):
                     return QtGui.QColor(255, 191, 0)
+                if (
+                    (isinstance(value, str))
+                    and value == "Minor Deficiencies"
+                ):
+                    return QtGui.QColor(173, 216, 230)
 
     def setData(self, index, value, role):
         if role == Qt.ItemDataRole.EditRole:
@@ -109,7 +114,7 @@ delegate = ComboBoxDelegate()
 delegate.setItems(["Accepted", "Rejected"])
 action_delegate = ComboBoxDelegate()
 options_delegate = ComboBoxDelegate()
-options_delegate.setItems(["Accepted", "Rejected", "Removed"])
+options_delegate.setItems(["Accepted", "Rejected", "Removed","Minor Deficiencies"])
 corrective_delegate = ComboBoxDelegate()
 empty_delegate = ComboBoxDelegate()
 
@@ -412,10 +417,29 @@ def pandas2word(self):
     print(f"Excel file path: {excel_filepath}")
     print(f"Temporary Excel file path: {temp_excel_filepath}")
     try:
-        self.getchoice = App()
+        self.getchoice = QWidget()
+        self.dialog = InputDialog() 
+
+        if self.dialog.exec_() == QDialog.Accepted:  # If user clicks 'OK' (btnEdit)
+            self.dialog.get_values()  # Fetch values
+            
+            # Store values in variables
+            self.getchoice.item2  = self.dialog.WalkthroughOrButton
+            self.getchoice.item = self.dialog.AcceptedOrRejected
+            self.getchoice.text= self.dialog.inspection_date
+            print(self.getchoice.item,self.getchoice.item2,self.getchoice.text)
+            # Assign values in the same format as self.getchoice
+            # self.getchoice.item = self.dialog.item
+            # self.getchoice.item2 = self.dialog.item2
+            # self.getchoice.text = self.dialog.text
+        else:
+            print("Dialog cancelled")
+            return
+        # self.getchoice = App()
         # Using pandas ExcelWriter for writing data
         writer = pd.ExcelWriter(excel_filepath, engine='xlsxwriter')
         if self.getchoice.item == "Acceptance" and self.getchoice.item2 == "Walkthrough":
+            print("Acceptance and Walkthrough")
             found = self.df[self.df['Walkthrough'].fillna('').str.contains('Rejected', na=False)]
             found2 = len(self.df[self.df['Walkthrough'].fillna('') == ''])
             
@@ -437,6 +461,8 @@ def pandas2word(self):
                 green = workbook.add_format({'bg_color': '#90EE90'})
                 orange = workbook.add_format({'bg_color': 'yellow'})
                 border = workbook.add_format({'border': 1})
+                light_blue = workbook.add_format({'bg_color': '#ADD8E6'})  # Light Blue Background
+
                 header_format = workbook.add_format({'bold': True, 'text_wrap': True})
                 
                 # Adding text wrapping for cells
@@ -466,7 +492,12 @@ def pandas2word(self):
                 worksheet.conditional_format('A1:Z100', {'type': 'text', 'criteria': 'containing', 'value': 'Rejected', 'format': red})
                 worksheet.conditional_format('A1:Z100', {'type': 'text', 'criteria': 'containing', 'value': 'Accepted', 'format': green})
                 worksheet.conditional_format('A1:Z100', {'type': 'text', 'criteria': 'containing', 'value': 'Removed', 'format': orange})
-
+                worksheet.conditional_format('A1:Z100',
+                                                            {'type': 'text',
+                                                            'criteria': 'containing',
+                                                            'value': 'Minor Deficiencies',
+                                                            'format':light_blue
+                                                            })
                 # Apply border formatting
                 worksheet.conditional_format(rowcount, 1, 1, colcount, {'type': 'no_blanks', 'format': border})
 
@@ -516,6 +547,8 @@ def pandas2word(self):
                 red = workbook.add_format({'bg_color': '#ffcccb'})
                 green = workbook.add_format({'bg_color': '#90EE90'})
                 orange = workbook.add_format({'bg_color': 'yellow'})
+                light_blue = workbook.add_format({'bg_color': '#ADD8E6'})  # Light Blue Background
+
                 border = workbook.add_format({'border': 1})
 
                 worksheet = writer.sheets['Sheet1']
@@ -563,6 +596,12 @@ def pandas2word(self):
                                                             'value': 'Removed',
                                                             'format':orange
                                                             })
+                worksheet.conditional_format('A1:Z100',
+                                                            {'type': 'text',
+                                                            'criteria': 'containing',
+                                                            'value': 'Minor Deficiencies',
+                                                            'format':light_blue
+                                                            })
 
                 worksheet.conditional_format(rowcount, 1, 1, colcount, {'type': 'no_blanks','format': border})
                 
@@ -594,6 +633,7 @@ def pandas2word(self):
                 green = workbook.add_format({'bg_color': '#90EE90'})
                 orange = workbook.add_format({'bg_color': 'yellow'})
                 border = workbook.add_format({'border': 1})
+                light_blue = workbook.add_format({'bg_color': '#ADD8E6'})  # Light Blue Background
 
                 worksheet = writer.sheets['Sheet1']
                 if self.code == 1:
@@ -639,6 +679,13 @@ def pandas2word(self):
                                                             'value': 'Removed',
                                                             'format':orange
                                                             })
+                worksheet.conditional_format('A1:Z100',
+                                                            {'type': 'text',
+                                                            'criteria': 'containing',
+                                                            'value': 'Minor Deficiencies',
+                                                            'format':light_blue
+                                                            })
+
 
                 worksheet.conditional_format(rowcount, 1, 1, colcount, {'type': 'no_blanks','format': border})
                 
@@ -670,6 +717,7 @@ def pandas2word(self):
                 green = workbook.add_format({'bg_color': '#90EE90'})
                 orange = workbook.add_format({'bg_color': 'yellow'})
                 border = workbook.add_format({'border': 1})
+                light_blue = workbook.add_format({'bg_color': '#ADD8E6'})  # Light Blue Background
 
                 worksheet = writer.sheets['Sheet1']
                 if self.code == 1:
@@ -715,6 +763,12 @@ def pandas2word(self):
                                                             'criteria': 'containing',
                                                             'value': 'Removed',
                                                             'format':orange
+                                                            })
+                worksheet.conditional_format('A1:Z100',
+                                                            {'type': 'text',
+                                                            'criteria': 'containing',
+                                                            'value': 'Minor Deficiencies',
+                                                            'format':light_blue
                                                             })
 
                 worksheet.conditional_format(rowcount, 1, 1, colcount, {'type': 'no_blanks','format': border})
