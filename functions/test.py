@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'dialog.ui'
+# Form implementation generated from reading ui file 'test.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.11
 #
@@ -11,48 +11,15 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_Dialog(object):
-    def setupUi(self, Dialog):
-        Dialog.setObjectName("Dialog")
-        Dialog.resize(469, 367)
-        Dialog.setStyleSheet("QLabel{\n"
-"font: 10pt \"Bahnschrift SemiCondensed\";\n"
-"\n"
-"}\n"
-"\n"
-"#btnEdit {\n"
-"    background-color: #48ACAC;\n"
-"    border-radius:50px;\n"
-"    color:white;\n"
-"font: 14pt \"Bahnschrift SemiCondensed\";\n"
-"\n"
-"}\n"
-"#btnEdit:hover{\n"
-"background-color: #2F958D;\n"
-"}\n"
-"\n"
-"QComboBox{\n"
-"    background-color: #fff;\n"
-"    border-radius: 5px;\n"
-"    border: 1px solid gray;\n"
-"    padding: 5px;\n"
-"    padding-left: 5px;\n"
-"}\n"
-"QComboBox:hover{\n"
-"    border: 2px solid gray;\n"
-"}\n"
-"\n"
-"QComboBox QAbstractItemView {\n"
-"    color: black;    \n"
-"    background-color: white;\n"
-"    padding: 10px;\n"
-"    selection-background-color: rgb(39, 44, 54);\n"
-"}")
-        self.verticalLayout = QtWidgets.QVBoxLayout(Dialog)
-        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout.setSpacing(0)
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(523, 410)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.frame = QtWidgets.QFrame(Dialog)
+        self.frame = QtWidgets.QFrame(self.centralwidget)
         self.frame.setStyleSheet("")
         self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
@@ -65,7 +32,6 @@ class Ui_Dialog(object):
         self.gridLayout.setObjectName("gridLayout")
         self.cmbxAcceptedOrRejected = QtWidgets.QComboBox(self.frame)
         self.cmbxAcceptedOrRejected.setMinimumSize(QtCore.QSize(0, 25))
-        self.cmbxAcceptedOrRejected.setMaximumSize(QtCore.QSize(16777215, 25))
         self.cmbxAcceptedOrRejected.setStyleSheet("")
         self.cmbxAcceptedOrRejected.setObjectName("cmbxAcceptedOrRejected")
         self.cmbxAcceptedOrRejected.addItem("")
@@ -73,7 +39,6 @@ class Ui_Dialog(object):
         self.gridLayout.addWidget(self.cmbxAcceptedOrRejected, 1, 1, 1, 1)
         self.cmbxWalkthroughOrButton = QtWidgets.QComboBox(self.frame)
         self.cmbxWalkthroughOrButton.setMinimumSize(QtCore.QSize(0, 25))
-        self.cmbxWalkthroughOrButton.setMaximumSize(QtCore.QSize(16777215, 25))
         self.cmbxWalkthroughOrButton.setStyleSheet("")
         self.cmbxWalkthroughOrButton.setObjectName("cmbxWalkthroughOrButton")
         self.cmbxWalkthroughOrButton.addItem("")
@@ -96,7 +61,6 @@ class Ui_Dialog(object):
         self.gridLayout.addWidget(self.projectid_label, 0, 0, 1, 1)
         self.dateInspection = QtWidgets.QDateEdit(self.frame)
         self.dateInspection.setMinimumSize(QtCore.QSize(0, 25))
-        self.dateInspection.setMaximumSize(QtCore.QSize(16777215, 25))
         self.dateInspection.setTimeSpec(QtCore.Qt.LocalTime)
         self.dateInspection.setDate(QtCore.QDate(2025, 1, 1))
         self.dateInspection.setObjectName("dateInspection")
@@ -118,20 +82,27 @@ class Ui_Dialog(object):
         self.verticalLayout_3.addWidget(self.btnEdit)
         self.verticalLayout_2.addWidget(self.frame_3, 0, QtCore.Qt.AlignHCenter)
         self.verticalLayout.addWidget(self.frame)
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 523, 26))
+        self.menubar.setObjectName("menubar")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
 
-        self.retranslateUi(Dialog)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def retranslateUi(self, Dialog):
+    def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Input Dialog"))
-        self.cmbxAcceptedOrRejected.setItemText(0, _translate("Dialog", "Acceptance"))
-        self.cmbxAcceptedOrRejected.setItemText(1, _translate("Dialog", "Rejection"))
-        self.cmbxWalkthroughOrButton.setItemText(0, _translate("Dialog", "Walkthrough"))
-        self.cmbxWalkthroughOrButton.setItemText(1, _translate("Dialog", "Warranty"))
-        self.projectid_label_2.setText(_translate("Dialog", "Accepted or Rejected:"))
-        self.label_17.setText(_translate("Dialog", "Enter Inspection Date (mm-dd-yyyy)"))
-        self.projectid_label.setText(_translate("Dialog", "Walkthrough or Warranty:"))
-        self.dateInspection.setDisplayFormat(_translate("Dialog", "MM/dd/yyyy"))
-        self.btnEdit.setText(_translate("Dialog", "Done"))
-import resources_rc
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.cmbxAcceptedOrRejected.setItemText(0, _translate("MainWindow", "Acceptance"))
+        self.cmbxAcceptedOrRejected.setItemText(1, _translate("MainWindow", "Rejection"))
+        self.cmbxWalkthroughOrButton.setItemText(0, _translate("MainWindow", "Walkthrough"))
+        self.cmbxWalkthroughOrButton.setItemText(1, _translate("MainWindow", "Warranty"))
+        self.projectid_label_2.setText(_translate("MainWindow", "Accepted or Rejected:"))
+        self.label_17.setText(_translate("MainWindow", "Enter Inspection Date (mm-dd-yyyy)"))
+        self.projectid_label.setText(_translate("MainWindow", "Walkthrough or Warranty:"))
+        self.dateInspection.setDisplayFormat(_translate("MainWindow", "MM/dd/yyyy"))
+        self.btnEdit.setText(_translate("MainWindow", "Done"))

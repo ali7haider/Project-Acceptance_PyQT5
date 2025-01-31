@@ -67,24 +67,7 @@ QComboBox QAbstractItemView {
    <item>
     <widget class="QFrame" name="frame">
      <property name="styleSheet">
-      <string notr="true"> QCheckBox::indicator {
-    border: 1px solid rgb(52, 59, 72);
-	width: 15px;
-	height: 15px;
-	border-radius: 3px;
-}
-QCheckBox::indicator:hover {
-    background-color: rgba(100, 150, 200, 0.2); /* Add a light background on hover */
-}
-QCheckBox::indicator:unchecked {
-    border: 1px solid rgb(52, 59, 72);
-}
-
-QCheckBox::indicator:checked {
-    background-color:#48ACAc;
-    border: 1px solid rgb(0, 200, 100); /* Color when checked */
-	background-image: url(:/images/images/cil-check-alt.png);
-}</string>
+      <string notr="true"/>
      </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -109,6 +92,12 @@ QCheckBox::indicator:checked {
             <height>25</height>
            </size>
           </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>25</height>
+           </size>
+          </property>
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -129,6 +118,12 @@ QCheckBox::indicator:checked {
           <property name="minimumSize">
            <size>
             <width>0</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
             <height>25</height>
            </size>
           </property>
@@ -197,6 +192,12 @@ QCheckBox::indicator:checked {
           <property name="minimumSize">
            <size>
             <width>0</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
             <height>25</height>
            </size>
           </property>

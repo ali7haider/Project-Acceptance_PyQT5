@@ -14,6 +14,7 @@ import functions.word as word
 import functions.mail as mail
 import os
 import pythoncom
+from functions.test1 import Screen
 # Creates the model for the QTableView
 class PandasModel(QAbstractTableModel):
     def __init__(self, data):
@@ -164,49 +165,49 @@ def filename_checker(self):
 
         self.excel_filename = self.concat + "/Excel/" + self.filename
 
-class App(QWidget):
-    global acceptedorrejected
-    global walkthroughorwarranty
-    global workorder
+# class App(QWidget):
+#     global acceptedorrejected
+#     global walkthroughorwarranty
+#     global workorder
 
-    def __init__(self):
-        super().__init__()
-        self.title = 'PyQt5 input dialogs - pythonspot.com'
-        self.left = 10
-        self.top = 10
-        self.width = 640
-        self.height = 480
-        self.initUI()
+#     def __init__(self):
+#         super().__init__()
+#         self.title = 'PyQt5 input dialogs - pythonspot.com'
+#         self.left = 10
+#         self.top = 10
+#         self.width = 640
+#         self.height = 480
+#         self.initUI()
     
-    def initUI(self):
-        # self.setWindowTitle(self.title)
-        # self.setGeometry(self.left, self.top, self.width, self.height)
-        # self.center()
+#     def initUI(self):
+#         # self.setWindowTitle(self.title)
+#         # self.setGeometry(self.left, self.top, self.width, self.height)
+#         # self.center()
 
-        self.getChoice()
-        self.getText()
+#         self.getChoice()
+#         self.getText()
         
-        # self.show()
+#         # self.show()
 
-    def getChoice(self):
-        accepted_rejected = ("","Acceptance","Rejection")
-        walkthrough_warranty = ("Walkthrough","Warranty")
-        self.item2, okPressed = QInputDialog.getItem(self, "Get item","Walkthrough or Warranty:", walkthrough_warranty, 0, False)
-        self.item, okPressed = QInputDialog.getItem(self, "Get item","Accepted or Rejected:", accepted_rejected, 0, False)
-        if okPressed and self.item and self.item2:
-            print(self.item)
-            print(self.item2)
+#     def getChoice(self):
+#         accepted_rejected = ("","Acceptance","Rejection")
+#         walkthrough_warranty = ("Walkthrough","Warranty")
+#         self.item2, okPressed = QInputDialog.getItem(self, "Get item","Walkthrough or Warranty:", walkthrough_warranty, 0, False)
+#         self.item, okPressed = QInputDialog.getItem(self, "Get item","Accepted or Rejected:", accepted_rejected, 0, False)
+#         if okPressed and self.item and self.item2:
+#             print(self.item)
+#             print(self.item2)
 
-    def getText(self):
-        self.text, okPressed = QInputDialog.getText(self, "Get text","Please Enter Inspection Date mm-dd-yyyy:",  QtWidgets.QLineEdit.EchoMode.Normal, "")
-        if okPressed and self.text != '':
-            print(self.text)
+#     def getText(self):
+#         self.text, okPressed = QInputDialog.getText(self, "Get text","Please Enter Inspection Date mm-dd-yyyy:",  QtWidgets.QLineEdit.EchoMode.Normal, "")
+#         if okPressed and self.text != '':
+#             print(self.text)
 
-    def center(self):
-        qr = self.frameGeometry()
-        cp = QtGui.QGuiApplication.primaryScreen().availableGeometry().center()
-        qr.moveCenter(cp)
-        self.move(qr.topLeft())
+#     def center(self):
+#         qr = self.frameGeometry()
+#         cp = QtGui.QGuiApplication.primaryScreen().availableGeometry().center()
+#         qr.moveCenter(cp)
+#         self.move(qr.topLeft())
 
 def send(self):
     filename_checker(self)
@@ -419,7 +420,6 @@ def pandas2word(self):
     try:
         self.getchoice = QWidget()
         self.dialog = InputDialog() 
-
         if self.dialog.exec_() == QDialog.Accepted:  # If user clicks 'OK' (btnEdit)
             self.dialog.get_values()  # Fetch values
             

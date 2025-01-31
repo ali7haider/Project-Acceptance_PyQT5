@@ -53,24 +53,7 @@ class Ui_Dialog(object):
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.frame = QtWidgets.QFrame(Dialog)
-        self.frame.setStyleSheet(" QCheckBox::indicator {\n"
-"    border: 1px solid rgb(52, 59, 72);\n"
-"    width: 15px;\n"
-"    height: 15px;\n"
-"    border-radius: 3px;\n"
-"}\n"
-"QCheckBox::indicator:hover {\n"
-"    background-color: rgba(100, 150, 200, 0.2); /* Add a light background on hover */\n"
-"}\n"
-"QCheckBox::indicator:unchecked {\n"
-"    border: 1px solid rgb(52, 59, 72);\n"
-"}\n"
-"\n"
-"QCheckBox::indicator:checked {\n"
-"    background-color:#48ACAc;\n"
-"    border: 1px solid rgb(0, 200, 100); /* Color when checked */\n"
-"    background-image: url(:/images/images/cil-check-alt.png);\n"
-"}")
+        self.frame.setStyleSheet("")
         self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame.setObjectName("frame")
