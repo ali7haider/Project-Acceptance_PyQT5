@@ -391,15 +391,26 @@ def exportToExcel(self, table):
 
 
 def pandas2word(self):
+    # Ensure Excel processes are killed
     kill_excel()
 
-    temp_dir = "Temp"
-    os.makedirs(temp_dir, exist_ok=True)
-    excel_filepath = os.path.join(temp_dir, "temp.xlsx")
-    temp_excel_filepath = os.path.join(temp_dir, "temp2.xlsx")
-    excel_filepath=r'D:\Study\Fiverr Projects\Latest New\4-   450usd\Project-Acceptance_PyQT5\Temp\temp.xlsx'
-    temp_excel_filepath=r'D:\Study\Fiverr Projects\Latest New\4-   450usd\Project-Acceptance_PyQT5\Temp\temp2.xlsx'
+    # Get the current working directory (path to the script)
+    path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+
+    # Define the temporary directory path
+    temp_dir = os.path.join(path, "Temp")  # Create Temp folder path relative to the script directory
+
+    # Ensure the directory exists
+    os.makedirs(temp_dir, exist_ok=True)
+
+    # Define the Excel file paths
+    excel_filepath = os.path.join(temp_dir, "temp1.xlsx")
+    temp_excel_filepath = os.path.join(temp_dir, "temp2.xlsx")
+
+    # Print file paths for debugging (optional)
+    print(f"Excel file path: {excel_filepath}")
+    print(f"Temporary Excel file path: {temp_excel_filepath}")
     try:
         self.getchoice = App()
         # Using pandas ExcelWriter for writing data
@@ -776,9 +787,14 @@ def variation(self):
     
 
 def word_sol(self, name):
+    path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-    original = r'D:\Study\Fiverr Projects\Latest New\4-   450usd\Project-Acceptance_PyQT5\Temp\test.docx'
-    target = r'D:\Study\Fiverr Projects\Latest New\4-   450usd\Project-Acceptance_PyQT5\Temp\test_copy.docx'
+
+    # Define the temporary directory path
+    temp_dir = os.path.join(path, "Temp")  # Create Temp folder path relative to the script directory
+    # Define the Excel file paths
+    original = os.path.join(temp_dir, "test.docx")
+    target = os.path.join(temp_dir, "test_copy.docx")
     final_pdf_path = self.directory_code + "/" + self.area + "-" +self.getchoice.text + "-" + self.cip_dev + "-" +self.getchoice.item2 + "-SQ" + self.planfile_entry.text() + "(Asset List)"+ ".pdf"
     print("FINAL PATH "+ final_pdf_path)
     shutil.copyfile(original, target)
@@ -805,9 +821,15 @@ def word_sol(self, name):
 
 def create_pdf(self, name2):
     try:
+        path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+        # Define the temporary directory path
+        temp_dir = os.path.join(path, "Temp")  # Create Temp folder path relative to the script directory
+        # Define the Excel file paths
+        original = os.path.join(temp_dir, "test.docx")
+        target = os.path.join(temp_dir, "test_copy.docx")
         # Define file paths
-        original = r'D:\Study\Fiverr Projects\Latest New\4-   450usd\Project-Acceptance_PyQT5\Temp\test.docx'
-        target = r'D:\Study\Fiverr Projects\Latest New\4-   450usd\Project-Acceptance_PyQT5\Temp\test_copy.docx'
         
         # Check if the Word template file exists
         if not os.path.exists(original):

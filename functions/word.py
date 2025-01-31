@@ -12,9 +12,19 @@ from PyQt5.QtWidgets import QInputDialog,QWidget
 import functions.mail as mail
 
 
-def acceptance_no_deficiencies(self,variation, project, path, date, item, item2):
-    template = r"D:\Study\Fiverr Projects\Latest New\4-   450usd\Project-Acceptance_PyQT5\Templates\Word\{0}-{1}-{2}-{3} Letter-Template.docx".format(variation, project, item, item2)
-    print(template)
+def acceptance_no_deficiencies(self, variation, project, path, date, item, item2):
+    path2 = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+    # Define the temporary directory path
+    temp_dir = os.path.join(path2, "Templates", "Word")  # Create Temp folder path relative to the script directory
+
+    # Build the template file path dynamically using os.path.join
+    template_filename = f"{variation}-{project}-{item}-{item2} Letter-Template.docx"
+    template = os.path.join(temp_dir, template_filename)
+
+    # Print the resulting template path for debugging (optional)
+    print(f"Template file path: {template}")
     document = MailMerge(template)
     print(document.get_merge_fields())
     
@@ -37,9 +47,16 @@ def acceptance_no_deficiencies(self,variation, project, path, date, item, item2)
     mail.mail_to_sign(self,pdf_path,path)
 
 
-def rejected_word(self,variation, project, path, date, item, item2):
-    template = r"D:\Study\Fiverr Projects\Latest New\4-450usd\Project-Acceptance_PyQT5\Templates\Word\{0}-{1}-{2}-{3} Letter-Template.docx".format(variation, project, item, item2)
-    print(template)
+def rejected_word(self, variation, project, path, date, item, item2):
+    # Define the temporary directory path
+    temp_dir = os.path.join(path, "Templates", "Word")  # Create Temp folder path relative to the script directory
+
+    # Build the template file path dynamically using os.path.join
+    template_filename = f"{variation}-{project}-{item}-{item2} Letter-Template.docx"
+    template = os.path.join(temp_dir, template_filename)
+
+    # Print the resulting template path for debugging (optional)
+    print(f"Template file path: {template}")
     document = MailMerge(template)
     print(document.get_merge_fields())
     
