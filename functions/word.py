@@ -13,7 +13,7 @@ import functions.mail as mail
 
 
 def acceptance_no_deficiencies(self,variation, project, path, date, item, item2):
-    template = "O:\Field Services Division\Field Support Center\Project Acceptance\PA Excel Exterminator\Templates\Word\{0}-{1}-{2}-{3} Letter-Template.docx".format(variation, project, item, item2)
+    template = r"D:\Study\Fiverr Projects\Latest New\4-   450usd\Project-Acceptance_PyQT5\Templates\Word\{0}-{1}-{2}-{3} Letter-Template.docx".format(variation, project, item, item2)
     print(template)
     document = MailMerge(template)
     print(document.get_merge_fields())
@@ -38,7 +38,7 @@ def acceptance_no_deficiencies(self,variation, project, path, date, item, item2)
 
 
 def rejected_word(self,variation, project, path, date, item, item2):
-    template = "O:\Field Services Division\Field Support Center\Project Acceptance\PA Excel Exterminator\Templates\Word\{0}-{1}-{2}-{3} Letter-Template.docx".format(variation, project, item, item2)
+    template = r"D:\Study\Fiverr Projects\Latest New\4-450usd\Project-Acceptance_PyQT5\Templates\Word\{0}-{1}-{2}-{3} Letter-Template.docx".format(variation, project, item, item2)
     print(template)
     document = MailMerge(template)
     print(document.get_merge_fields())

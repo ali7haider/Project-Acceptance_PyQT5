@@ -5,11 +5,14 @@ from win32com import client
 from PyQt5.QtCore import QAbstractTableModel, QModelIndex,Qt
 from PyQt5.QtWidgets import QComboBox, QItemDelegate,QMessageBox,QInputDialog,QWidget
 import shutil
+import time
 import pandas as pd
 import configparser
 import json
 import functions.word as word
 import functions.mail as mail
+import os
+import pythoncom
 
 # Creates the model for the QTableView
 class PandasModel(QAbstractTableModel):
@@ -263,11 +266,24 @@ def remove_row(self, table):
     self.df = new_model
     table.show()
     
+import json
+import configparser
+from PyQt5.QtWidgets import QMessageBox
+import psutil
+
+def showError(message):
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Critical)
+    msg.setText("Error")
+    msg.setInformativeText(message)
+    msg.setWindowTitle("Error")
+    msg.exec_()
+
 def set_delegates(self, table):
 
     config = configparser.RawConfigParser()
     config.read(
-        "O:\Field Services Division\Field Support Center\Project Acceptance\PA Excel Exterminator\config\delegates.properties")
+        "config\delegates.properties")
 
     approved_cctv = config.get("GRAVITY", "approved_cctv")
     approved_cctv_list = json.loads(approved_cctv)
@@ -348,6 +364,12 @@ def set_delegates(self, table):
         table.setItemDelegateForColumn(6, options_delegate)
         table.setItemDelegateForColumn(8, options_delegate)
 
+# Kill all running Excel instances
+def kill_excel():
+    for process in psutil.process_iter():
+        if process.name().lower() == "excel.exe":
+            process.kill()
+
 
 def exportToExcel(self, table):
     columnHeaders = []
@@ -369,338 +391,336 @@ def exportToExcel(self, table):
 
 
 def pandas2word(self):
-    self.getchoice = App()
-    name = r"O:\Field Services Division\Field Support Center\Project Acceptance\PA Excel Exterminator\Temp\temp.xlsx"
-    name2 = r"O:\Field Services Division\Field Support Center\Project Acceptance\PA Excel Exterminator\Temp\temp2.xlsx"
-    writer = pd.ExcelWriter(name, engine='xlsxwriter')
-    if self.getchoice.item == "Acceptance" and self.getchoice.item2 == "Walkthrough":
-        found = self.df[self.df['Walkthrough'].str.contains('Rejected')]
-        found2 = len(self.df[self.df['Walkthrough'] == '']) 
-        if len(found) == 0 and found2 == 0:
-            filtered_df = variation(self)
-            filtered_df.to_excel(writer, sheet_name='Sheet1', index=False)
+    kill_excel()
+
+    temp_dir = "Temp"
+    os.makedirs(temp_dir, exist_ok=True)
+    excel_filepath = os.path.join(temp_dir, "temp.xlsx")
+    temp_excel_filepath = os.path.join(temp_dir, "temp2.xlsx")
+    excel_filepath=r'D:\Study\Fiverr Projects\Latest New\4-   450usd\Project-Acceptance_PyQT5\Temp\temp.xlsx'
+    temp_excel_filepath=r'D:\Study\Fiverr Projects\Latest New\4-   450usd\Project-Acceptance_PyQT5\Temp\temp2.xlsx'
+
+    try:
+        self.getchoice = App()
+        # Using pandas ExcelWriter for writing data
+        writer = pd.ExcelWriter(excel_filepath, engine='xlsxwriter')
+        if self.getchoice.item == "Acceptance" and self.getchoice.item2 == "Walkthrough":
+            found = self.df[self.df['Walkthrough'].fillna('').str.contains('Rejected', na=False)]
+            found2 = len(self.df[self.df['Walkthrough'].fillna('') == ''])
             
-            # filtered_df = self.df.loc[:, ~self.df.columns.isin(["OC Surveyor", "Notes.1"])]
-            rowcount = self.tableview.model().rowCount()
-            colcount = self.tableview.model().columnCount()
+            if len(found) == 0 and found2 == 0:
+                # Filtered DataFrame that you want to save
+                filtered_df = variation(self)
+                filtered_df.to_excel(writer, sheet_name='Sheet1', index=False)
 
-            # Get the xlsxwriter workbook and worksheet objects.
-            workbook  = writer.book
-            cell_format = workbook.add_format()
-            cell_format.set_text_wrap()
-            red = workbook.add_format({'bg_color': '#ffcccb'})
-            green = workbook.add_format({'bg_color': '#90EE90'})
-            orange = workbook.add_format({'bg_color': 'yellow'})
-            border = workbook.add_format({'border': 1})
-            header_format = workbook.add_format({
-                                                'bold': True,
-                                                'text_wrap': True})
+                # Get row and column count for formatting
+                rowcount = self.tableview.model().rowCount()
+                colcount = self.tableview.model().columnCount()
 
-            worksheet = writer.sheets['Sheet1']
+                # Get the xlsxwriter workbook and worksheet objects
+                workbook = writer.book
+                worksheet = writer.sheets['Sheet1']
+                
+                # Define formats
+                red = workbook.add_format({'bg_color': '#ffcccb'})
+                green = workbook.add_format({'bg_color': '#90EE90'})
+                orange = workbook.add_format({'bg_color': 'yellow'})
+                border = workbook.add_format({'border': 1})
+                header_format = workbook.add_format({'bold': True, 'text_wrap': True})
+                
+                # Adding text wrapping for cells
+                cell_format = workbook.add_format()
+                cell_format.set_text_wrap()
+
+                # Apply column widths and conditional formatting based on self.code
+                if self.code == 1:
+                    worksheet.set_column('A:F', 12, cell_format)
+                elif self.code == 2:
+                    worksheet.set_column('A:F', 12, cell_format)
+                    worksheet.set_column('G:G', 30, cell_format)
+                elif self.code == 3:
+                    worksheet.set_column('A:K', 10, cell_format)
+                    worksheet.set_column('L:L', 25, cell_format)
+                elif self.code == 4:
+                    worksheet.set_column('A:H', 12, cell_format)
+                    worksheet.set_column('I:I', 25, cell_format)
+                elif self.code == 5:
+                    worksheet.set_column('A:H', 12, cell_format)
+                    worksheet.set_column('I:I', 20, cell_format)
+                elif self.code == 6:
+                    worksheet.set_column('A:H', 12, cell_format)
+                    worksheet.set_column('I:I', 20, cell_format)
+
+                # Apply conditional formatting for specific values
+                worksheet.conditional_format('A1:Z100', {'type': 'text', 'criteria': 'containing', 'value': 'Rejected', 'format': red})
+                worksheet.conditional_format('A1:Z100', {'type': 'text', 'criteria': 'containing', 'value': 'Accepted', 'format': green})
+                worksheet.conditional_format('A1:Z100', {'type': 'text', 'criteria': 'containing', 'value': 'Removed', 'format': orange})
+
+                # Apply border formatting
+                worksheet.conditional_format(rowcount, 1, 1, colcount, {'type': 'no_blanks', 'format': border})
+
+                # No need for writer.save() as ExcelWriter will handle it automatically when 'with' block exits.
+                print("Excel file saved successfully!")
+                # Ensure the file is saved and exists before proceeding
+                if os.path.exists(excel_filepath):
+                    print(f"File {excel_filepath} exists!")
+                    writer.save()
+                    excel = client.Dispatch("Excel.Application")
+                    print("Opening Excel...")
+                    sheets = excel.Workbooks.Open(excel_filepath)
+                    
+                    work_sheets = sheets.Worksheets[0]
+                    work_sheets.PageSetup.Orientation = 2
+                    sheets.SaveAs(temp_excel_filepath)
+                    sheets.Close(True)
+                    excel.Application.Quit()
+                    print("Excel closed.")
+                    # writer.close()
+                    # word_sol(self,name)
+                    print("Creating PDF...")
+                    create_pdf(self,temp_excel_filepath)
+                    print("PDF created.")
+                    location = self.directory_code 
+                    word.acceptance_no_deficiencies(self, self.area, self.cip_dev, location,self.getchoice.text, self.getchoice.item2, self.getchoice.item)
+                else:
+                    print(f"File {excel_filepath} does not exist!")
+            else:
+                print("Conditions for acceptance not met. Triggering error acceptance.")
+                error_acceptance()
+
+        if self.getchoice.item == "Acceptance" and self.getchoice.item2 == "Warranty":
+            found = self.df[self.df['Warranty'].str.contains('Rejected')]
+            found2 = len(self.df[self.df['Warranty'] == '']) 
+            if len(found) == 0 and found2 == 0:
+                filtered_df = variation(self)
+                filtered_df.to_excel(writer, sheet_name='Sheet1')
+                # filtered_df = self.df.loc[:, ~self.df.columns.isin(["OC Surveyor", "Notes.1"])]
+                rowcount = self.tableview.model().rowCount()
+                colcount = self.tableview.model().columnCount()
+
+                # Get the xlsxwriter workbook and worksheet objects.
+                workbook  = writer.book
+                cell_format = workbook.add_format()
+                cell_format.set_text_wrap()
+                red = workbook.add_format({'bg_color': '#ffcccb'})
+                green = workbook.add_format({'bg_color': '#90EE90'})
+                orange = workbook.add_format({'bg_color': 'yellow'})
+                border = workbook.add_format({'border': 1})
+
+                worksheet = writer.sheets['Sheet1']
+                if self.code == 1:
+                    worksheet.set_column('A:F', 12)
+                    worksheet.set_column('G:G', 60)
+
+                if self.code == 2:
+                    worksheet.set_column('A:F', 12)
+                    worksheet.set_column('G:G', 60)
             
-            print(self.code)
-            if self.code == 1:
-                worksheet.set_column('A:F', 12)
-                # worksheet.set_column('G:G', 30)
+                if self.code == 3:
+                    worksheet.set_column('A:K', 10)
+                    worksheet.set_column('L:L', 45)
 
-            if self.code == 2:
-                worksheet.set_column('A:F', 12)
-                worksheet.set_column('G:G', 30)
-        
-            if self.code == 3:
-                worksheet.set_column('A:K', 10)
-                worksheet.set_column('L:L', 25)
+                if self.code == 4:
+                    worksheet.set_column('A:G', 12)
+                    worksheet.set_column('H:H', 35)
 
-            if self.code == 4:
-                worksheet.set_column('A:H', 12)
-                worksheet.set_column('I:I', 25)
+                if self.code == 5:
+                    worksheet.set_column('A:H', 12)
+                    worksheet.set_column('I:I', 35)
 
-            if self.code == 5:
-                worksheet.set_column('A:H', 12)
-                worksheet.set_column('I:I', 20)
+                if self.code == 6:
+                    worksheet.set_column('A:H', 12)
+                    worksheet.set_column('I:I', 40)
 
-            if self.code == 6:
-                worksheet.set_column('A:H', 12)
-                worksheet.set_column('I:I', 20)
+                worksheet.conditional_format('A1:Z100',
+                                                            {'type': 'text',
+                                                            'criteria': 'containing',
+                                                            'value': 'Rejected',
+                                                            'format':red
+                                                            })
+
+                worksheet.conditional_format('A1:Z100',
+                                                            {'type': 'text',
+                                                            'criteria': 'containing',
+                                                            'value': 'Accepted',
+                                                            'format':green
+                                                            })
+
+                worksheet.conditional_format('A1:Z100',
+                                                            {'type': 'text',
+                                                            'criteria': 'containing',
+                                                            'value': 'Removed',
+                                                            'format':orange
+                                                            })
+
+                worksheet.conditional_format(rowcount, 1, 1, colcount, {'type': 'no_blanks','format': border})
+                
+                writer.save()
+                
+                # writer.close()
+                word_sol(self,excel_filepath)
+                location = self.directory_code 
+                word.acceptance_no_deficiencies(self, self.area, self.cip_dev, location,self.getchoice.text, self.getchoice.item2, self.getchoice.item)
+            else:
+                print("got u again")
+                error_acceptance()
                 
 
-            worksheet.conditional_format('A1:Z100',
-                                                        {'type': 'text',
-                                                        'criteria': 'containing',
-                                                        'value': 'Rejected',
-                                                        'format':red
-                                                        })
+        if self.getchoice.item == "Rejection" and self.getchoice.item2 == "Walkthrough":
+            found2 = len(self.df[self.df['Walkthrough'] == '']) 
+            if found2 == 0:
+                filtered_df = variation(self)
+                filtered_df.to_excel(writer, sheet_name='Sheet1',index=False)
+                # filtered_df = self.df.loc[:, ~self.df.columns.isin(["OC Surveyor", "Notes.1"])]
+                rowcount = self.tableview.model().rowCount()
+                colcount = self.tableview.model().columnCount()
 
-            worksheet.conditional_format('A1:Z100',
-                                                        {'type': 'text',
-                                                        'criteria': 'containing',
-                                                        'value': 'Accepted',
-                                                        'format':green
-                                                        })
+                # Get the xlsxwriter workbook and worksheet objects.
+                workbook  = writer.book
+                cell_format = workbook.add_format()
+                cell_format.set_text_wrap()
+                red = workbook.add_format({'bg_color': '#ffcccb'})
+                green = workbook.add_format({'bg_color': '#90EE90'})
+                orange = workbook.add_format({'bg_color': 'yellow'})
+                border = workbook.add_format({'border': 1})
 
-            worksheet.conditional_format('A1:Z100',
-                                                        {'type': 'text',
-                                                        'criteria': 'containing',
-                                                        'value': 'Removed',
-                                                        'format':orange
-                                                        })
+                worksheet = writer.sheets['Sheet1']
+                if self.code == 1:
+                    worksheet.set_column('A:F', 12)
+                    worksheet.set_column('G:G', 60)
 
-            worksheet.conditional_format(rowcount, 1, 1, colcount, {'type': 'no_blanks','format': border})
-
-            writer.save()
-            excel = client.Dispatch("Excel.Application")
-
-            sheets = excel.Workbooks.Open(name)
-            work_sheets = sheets.Worksheets[0]
-            # work_sheets.Range("B1:L1").ColumnWidth = 15
-            # work_sheets.Rows.AutoFit()
-            # work_sheets.Columns.WrapText = True
+                if self.code == 2:
+                    worksheet.set_column('A:F', 12)
+                    worksheet.set_column('G:G', 60)
             
-            work_sheets.PageSetup.Orientation = 2
-            sheets.SaveAs(name2)
-            sheets.Close(True)
-            excel.Application.Quit()
-            # writer.close()
-            # word_sol(self,name)
-            create_pdf(self,name2)
-            location = self.directory_code 
-            word.acceptance_no_deficiencies(self, self.area, self.cip_dev, location,self.getchoice.text, self.getchoice.item2, self.getchoice.item)
+                if self.code == 3:
+                    worksheet.set_column('A:K', 10)
+                    worksheet.set_column('L:L', 45)
+
+                if self.code == 4:
+                    worksheet.set_column('A:G', 12)
+                    worksheet.set_column('H:H', 35)
+
+                if self.code == 5:
+                    worksheet.set_column('A:H', 12)
+                    worksheet.set_column('I:I', 40)
+
+                if self.code == 6:
+                    worksheet.set_column('A:H', 12)
+                    worksheet.set_column('I:I', 40)
+                worksheet.conditional_format('A1:Z100',
+                                                            {'type': 'text',
+                                                            'criteria': 'containing',
+                                                            'value': 'Rejected',
+                                                            'format':red
+                                                            })
+
+                worksheet.conditional_format('A1:Z100',
+                                                            {'type': 'text',
+                                                            'criteria': 'containing',
+                                                            'value': 'Accepted',
+                                                            'format':green
+                                                            })
+
+                worksheet.conditional_format('A1:Z100',
+                                                            {'type': 'text',
+                                                            'criteria': 'containing',
+                                                            'value': 'Removed',
+                                                            'format':orange
+                                                            })
+
+                worksheet.conditional_format(rowcount, 1, 1, colcount, {'type': 'no_blanks','format': border})
+                
+                writer.save()
+                
+                # writer.close()
+                word_sol(self,excel_filepath)
+                location = self.directory_code 
+                word.rejected_word(self, self.area, self.cip_dev, location,self.getchoice.text, self.getchoice.item2, self.getchoice.item)
+            else:
+                    print("got u again")
+                    error_rejection()
+                    pass
+
+        if self.getchoice.item == "Rejection" and self.getchoice.item2 == "Warranty":
+            found2 = len(self.df[self.df['Warranty'] == '']) 
+            if found2 == 0:
+                filtered_df = variation(self)
+                filtered_df.to_excel(writer, sheet_name='Sheet1')
+                # filtered_df = self.df.loc[:, ~self.df.columns.isin(["OC Surveyor", "Notes.1"])]
+                rowcount = self.tableview.model().rowCount()
+                colcount = self.tableview.model().columnCount()
+
+                # Get the xlsxwriter workbook and worksheet objects.
+                workbook  = writer.book
+                cell_format = workbook.add_format()
+                cell_format.set_text_wrap()
+                red = workbook.add_format({'bg_color': '#ffcccb'})
+                green = workbook.add_format({'bg_color': '#90EE90'})
+                orange = workbook.add_format({'bg_color': 'yellow'})
+                border = workbook.add_format({'border': 1})
+
+                worksheet = writer.sheets['Sheet1']
+                if self.code == 1:
+                    worksheet.set_column('A:F', 12)
+                    worksheet.set_column('G:G', 30)
+
+                if self.code == 2:
+                    worksheet.set_column('A:F', 12)
+                    worksheet.set_column('G:G', 30)
             
-        else:
-            print("got u again")
-            error_acceptance()
+                if self.code == 3:
+                    worksheet.set_column('A:K', 10)
+                    worksheet.set_column('L:L', 25)
 
-    if self.getchoice.item == "Acceptance" and self.getchoice.item2 == "Warranty":
-        found = self.df[self.df['Warranty'].str.contains('Rejected')]
-        found2 = len(self.df[self.df['Warranty'] == '']) 
-        if len(found) == 0 and found2 == 0:
-            filtered_df = variation(self)
-            filtered_df.to_excel(writer, sheet_name='Sheet1')
-            # filtered_df = self.df.loc[:, ~self.df.columns.isin(["OC Surveyor", "Notes.1"])]
-            rowcount = self.tableview.model().rowCount()
-            colcount = self.tableview.model().columnCount()
+                if self.code == 4:
+                    worksheet.set_column('A:H', 12)
+                    worksheet.set_column('I:I', 25)
 
-            # Get the xlsxwriter workbook and worksheet objects.
-            workbook  = writer.book
-            cell_format = workbook.add_format()
-            cell_format.set_text_wrap()
-            red = workbook.add_format({'bg_color': '#ffcccb'})
-            green = workbook.add_format({'bg_color': '#90EE90'})
-            orange = workbook.add_format({'bg_color': 'yellow'})
-            border = workbook.add_format({'border': 1})
+                if self.code == 5:
+                    worksheet.set_column('A:H', 12)
+                    worksheet.set_column('I:I', 20)
 
-            worksheet = writer.sheets['Sheet1']
-            if self.code == 1:
-                worksheet.set_column('A:F', 12)
-                worksheet.set_column('G:G', 60)
+                if self.code == 6:
+                    worksheet.set_column('A:H', 12)
+                    worksheet.set_column('I:I', 20)
 
-            if self.code == 2:
-                worksheet.set_column('A:F', 12)
-                worksheet.set_column('G:G', 60)
-        
-            if self.code == 3:
-                worksheet.set_column('A:K', 10)
-                worksheet.set_column('L:L', 45)
+                worksheet.conditional_format('A1:Z100',
+                                                            {'type': 'text',
+                                                            'criteria': 'containing',
+                                                            'value': 'Rejected',
+                                                            'format':red
+                                                            })
 
-            if self.code == 4:
-                worksheet.set_column('A:G', 12)
-                worksheet.set_column('H:H', 35)
+                worksheet.conditional_format('A1:Z100',
+                                                            {'type': 'text',
+                                                            'criteria': 'containing',
+                                                            'value': 'Accepted',
+                                                            'format':green
+                                                            })
 
-            if self.code == 5:
-                worksheet.set_column('A:H', 12)
-                worksheet.set_column('I:I', 35)
+                worksheet.conditional_format('A1:Z100',
+                                                            {'type': 'text',
+                                                            'criteria': 'containing',
+                                                            'value': 'Removed',
+                                                            'format':orange
+                                                            })
 
-            if self.code == 6:
-                worksheet.set_column('A:H', 12)
-                worksheet.set_column('I:I', 40)
+                worksheet.conditional_format(rowcount, 1, 1, colcount, {'type': 'no_blanks','format': border})
 
-            worksheet.conditional_format('A1:Z100',
-                                                        {'type': 'text',
-                                                        'criteria': 'containing',
-                                                        'value': 'Rejected',
-                                                        'format':red
-                                                        })
-
-            worksheet.conditional_format('A1:Z100',
-                                                        {'type': 'text',
-                                                        'criteria': 'containing',
-                                                        'value': 'Accepted',
-                                                        'format':green
-                                                        })
-
-            worksheet.conditional_format('A1:Z100',
-                                                        {'type': 'text',
-                                                        'criteria': 'containing',
-                                                        'value': 'Removed',
-                                                        'format':orange
-                                                        })
-
-            worksheet.conditional_format(rowcount, 1, 1, colcount, {'type': 'no_blanks','format': border})
-            
-            writer.save()
-            
-            # writer.close()
-            word_sol(self,name)
-            location = self.directory_code 
-            word.acceptance_no_deficiencies(self, self.area, self.cip_dev, location,self.getchoice.text, self.getchoice.item2, self.getchoice.item)
-        else:
-            print("got u again")
-            error_acceptance()
-            
-
-    if self.getchoice.item == "Rejection" and self.getchoice.item2 == "Walkthrough":
-        found2 = len(self.df[self.df['Walkthrough'] == '']) 
-        if found2 == 0:
-            filtered_df = variation(self)
-            filtered_df.to_excel(writer, sheet_name='Sheet1',index=False)
-            # filtered_df = self.df.loc[:, ~self.df.columns.isin(["OC Surveyor", "Notes.1"])]
-            rowcount = self.tableview.model().rowCount()
-            colcount = self.tableview.model().columnCount()
-
-            # Get the xlsxwriter workbook and worksheet objects.
-            workbook  = writer.book
-            cell_format = workbook.add_format()
-            cell_format.set_text_wrap()
-            red = workbook.add_format({'bg_color': '#ffcccb'})
-            green = workbook.add_format({'bg_color': '#90EE90'})
-            orange = workbook.add_format({'bg_color': 'yellow'})
-            border = workbook.add_format({'border': 1})
-
-            worksheet = writer.sheets['Sheet1']
-            if self.code == 1:
-                worksheet.set_column('A:F', 12)
-                worksheet.set_column('G:G', 60)
-
-            if self.code == 2:
-                worksheet.set_column('A:F', 12)
-                worksheet.set_column('G:G', 60)
-        
-            if self.code == 3:
-                worksheet.set_column('A:K', 10)
-                worksheet.set_column('L:L', 45)
-
-            if self.code == 4:
-                worksheet.set_column('A:G', 12)
-                worksheet.set_column('H:H', 35)
-
-            if self.code == 5:
-                worksheet.set_column('A:H', 12)
-                worksheet.set_column('I:I', 40)
-
-            if self.code == 6:
-                worksheet.set_column('A:H', 12)
-                worksheet.set_column('I:I', 40)
-            worksheet.conditional_format('A1:Z100',
-                                                        {'type': 'text',
-                                                        'criteria': 'containing',
-                                                        'value': 'Rejected',
-                                                        'format':red
-                                                        })
-
-            worksheet.conditional_format('A1:Z100',
-                                                        {'type': 'text',
-                                                        'criteria': 'containing',
-                                                        'value': 'Accepted',
-                                                        'format':green
-                                                        })
-
-            worksheet.conditional_format('A1:Z100',
-                                                        {'type': 'text',
-                                                        'criteria': 'containing',
-                                                        'value': 'Removed',
-                                                        'format':orange
-                                                        })
-
-            worksheet.conditional_format(rowcount, 1, 1, colcount, {'type': 'no_blanks','format': border})
-            
-            writer.save()
-            
-            # writer.close()
-            word_sol(self,name)
-            location = self.directory_code 
-            word.rejected_word(self, self.area, self.cip_dev, location,self.getchoice.text, self.getchoice.item2, self.getchoice.item)
-        else:
-                print("got u again")
-                error_rejection()
-                pass
-
-    if self.getchoice.item == "Rejection" and self.getchoice.item2 == "Warranty":
-        found2 = len(self.df[self.df['Warranty'] == '']) 
-        if found2 == 0:
-            filtered_df = variation(self)
-            filtered_df.to_excel(writer, sheet_name='Sheet1')
-            # filtered_df = self.df.loc[:, ~self.df.columns.isin(["OC Surveyor", "Notes.1"])]
-            rowcount = self.tableview.model().rowCount()
-            colcount = self.tableview.model().columnCount()
-
-            # Get the xlsxwriter workbook and worksheet objects.
-            workbook  = writer.book
-            cell_format = workbook.add_format()
-            cell_format.set_text_wrap()
-            red = workbook.add_format({'bg_color': '#ffcccb'})
-            green = workbook.add_format({'bg_color': '#90EE90'})
-            orange = workbook.add_format({'bg_color': 'yellow'})
-            border = workbook.add_format({'border': 1})
-
-            worksheet = writer.sheets['Sheet1']
-            if self.code == 1:
-                worksheet.set_column('A:F', 12)
-                worksheet.set_column('G:G', 30)
-
-            if self.code == 2:
-                worksheet.set_column('A:F', 12)
-                worksheet.set_column('G:G', 30)
-        
-            if self.code == 3:
-                worksheet.set_column('A:K', 10)
-                worksheet.set_column('L:L', 25)
-
-            if self.code == 4:
-                worksheet.set_column('A:H', 12)
-                worksheet.set_column('I:I', 25)
-
-            if self.code == 5:
-                worksheet.set_column('A:H', 12)
-                worksheet.set_column('I:I', 20)
-
-            if self.code == 6:
-                worksheet.set_column('A:H', 12)
-                worksheet.set_column('I:I', 20)
-
-            worksheet.conditional_format('A1:Z100',
-                                                        {'type': 'text',
-                                                        'criteria': 'containing',
-                                                        'value': 'Rejected',
-                                                        'format':red
-                                                        })
-
-            worksheet.conditional_format('A1:Z100',
-                                                        {'type': 'text',
-                                                        'criteria': 'containing',
-                                                        'value': 'Accepted',
-                                                        'format':green
-                                                        })
-
-            worksheet.conditional_format('A1:Z100',
-                                                        {'type': 'text',
-                                                        'criteria': 'containing',
-                                                        'value': 'Removed',
-                                                        'format':orange
-                                                        })
-
-            worksheet.conditional_format(rowcount, 1, 1, colcount, {'type': 'no_blanks','format': border})
-
-            writer.save()
-            
-            # writer.close()
-            word_sol(self,name)
-            location = self.directory_code 
-            word.rejected_word(self, self.area, self.cip_dev, location,self.getchoice.text, self.getchoice.item2, self.getchoice.item)
-        else:
-                print("got u again")
-                error_rejection()
-                pass
-
+                writer.save()
+                
+                # writer.close()
+                word_sol(self,excel_filepath)
+                location = self.directory_code 
+                word.rejected_word(self, self.area, self.cip_dev, location,self.getchoice.text, self.getchoice.item2, self.getchoice.item)
+            else:
+                    print("got u again")
+                    error_rejection()
+                    pass
+    except Exception as e:
+        QMessageBox.critical(None, "Error", f"An error occurred:\n{str(e)}")
+        print(f"Error: {e}")
 
 def variation(self):
     
@@ -756,8 +776,9 @@ def variation(self):
     
 
 def word_sol(self, name):
-    original = r'O:\Field Services Division\Field Support Center\Project Acceptance\PA Excel Exterminator\Temp\test.docx'
-    target = r'O:\Field Services Division\Field Support Center\Project Acceptance\PA Excel Exterminator\Temp\test_copy.docx'
+
+    original = r'D:\Study\Fiverr Projects\Latest New\4-   450usd\Project-Acceptance_PyQT5\Temp\test.docx'
+    target = r'D:\Study\Fiverr Projects\Latest New\4-   450usd\Project-Acceptance_PyQT5\Temp\test_copy.docx'
     final_pdf_path = self.directory_code + "/" + self.area + "-" +self.getchoice.text + "-" + self.cip_dev + "-" +self.getchoice.item2 + "-SQ" + self.planfile_entry.text() + "(Asset List)"+ ".pdf"
     print("FINAL PATH "+ final_pdf_path)
     shutil.copyfile(original, target)
@@ -782,44 +803,73 @@ def word_sol(self, name):
     doc.Close()
     word.Quit()
 
-def create_pdf(self,name2):
-    original = r'O:\Field Services Division\Field Support Center\Project Acceptance\PA Excel Exterminator\Temp\test.docx'
-    target = r'O:\Field Services Division\Field Support Center\Project Acceptance\PA Excel Exterminator\Temp\test_copy.docx'
+def create_pdf(self, name2):
+    try:
+        # Define file paths
+        original = r'D:\Study\Fiverr Projects\Latest New\4-   450usd\Project-Acceptance_PyQT5\Temp\test.docx'
+        target = r'D:\Study\Fiverr Projects\Latest New\4-   450usd\Project-Acceptance_PyQT5\Temp\test_copy.docx'
+        
+        # Check if the Word template file exists
+        if not os.path.exists(original):
+            raise FileNotFoundError(f"Template file not found: {original}")
 
-    final_pdf_path = self.directory_code + "/" + self.area + "-" +self.getchoice.text + "-" + self.cip_dev + "-" +self.getchoice.item2 + "-SQ" + self.planfile_entry.text() + "(Asset List)"+ ".pdf"
-    # Open Microsoft Excel
-    shutil.copyfile(original, target)
-    # excel = client.Dispatch("Excel.Application")
-    word = client.Dispatch("Word.Application")
+        # Copy template to a temporary document
+        shutil.copyfile(original, target)
 
-    rowcount = self.tableview.model().rowCount()
-    colcount = self.tableview.model().columnCount()
-    doc = word.Documents.Open(target)
-    # # Read Excel File
-    # sheets = excel.Workbooks.Open(name)
-    # work_sheets = sheets.Worksheets[0]
-    # # work_sheets.Range("B1:L1").ColumnWidth = 15
-    # # work_sheets.Rows.AutoFit()
-    # work_sheets.Columns.WrapText = True
-    # work_sheets.PageSetup.Orientation = 2
-    # work_sheets.ExportAsFixedFormat(0, name2)
-    # excel.Application.Quit()
+        # Construct final PDF path
+        final_pdf_path = os.path.join(
+            self.directory_code,
+            f"{self.area}-{self.getchoice.text}-{self.cip_dev}-{self.getchoice.item2}-SQ{self.planfile_entry.text()}(Asset List).pdf"
+        )
 
-    # sheets.Save()
-    
-    # Convert into PDF File
-    excel2 = client.Dispatch("Excel.Application")
-    final_copy = excel2.Workbooks.Open(name2)
-    final_copy_sheet = final_copy.Worksheets[0]
-    final_copy_sheet.Range(final_copy_sheet.Cells(1,2),final_copy_sheet.Cells(rowcount+2,colcount)).Copy()      # Selected the table I need to copy
-    
-    wdRange = doc.Content
-    # wdRange.Collapse(1) #start of the document, use 0 for end of the document
-    wdRange.PasteExcelTable(False, False, False)
-    doc.SaveAs(final_pdf_path , FileFormat=17)
-    doc.Close()
-    word.Quit()
-    excel2.Application.Quit()
+        # Initialize COM objects
+        pythoncom.CoInitialize()
+
+        word = client.Dispatch("Word.Application")
+        doc = word.Documents.Open(target)
+
+        # Get row and column count from the table
+        rowcount = self.tableview.model().rowCount()
+        colcount = self.tableview.model().columnCount()
+
+        # Open Excel and get the worksheet
+        excel = client.Dispatch("Excel.Application")
+        final_copy = excel.Workbooks.Open(name2)
+        final_copy_sheet = final_copy.Worksheets[0]
+
+        # Copy the selected table range
+        final_copy_sheet.Range(
+            final_copy_sheet.Cells(1, 2),
+            final_copy_sheet.Cells(rowcount + 2, colcount)
+        ).Copy()
+
+        # Paste the table into the Word document
+        wdRange = doc.Content
+        wdRange.PasteExcelTable(False, False, False)
+
+        # Save as PDF
+        doc.SaveAs(final_pdf_path, FileFormat=17)
+        print(f"PDF successfully created: {final_pdf_path}")
+
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    finally:
+        # Ensure Word and Excel are closed
+        try:
+            if doc:
+                doc.Close()
+            if word:
+                word.Quit()
+            if excel:
+                excel.Application.Quit()
+        except Exception as cleanup_error:
+            print(f"Error while closing applications: {cleanup_error}")
+
+        pythoncom.CoUninitialize()
     
 
 def showError():
