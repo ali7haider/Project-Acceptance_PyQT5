@@ -14,7 +14,6 @@ import functions.word as word
 import functions.mail as mail
 import os
 import pythoncom
-from functions.test1 import Screen
 # Creates the model for the QTableView
 class PandasModel(QAbstractTableModel):
     def __init__(self, data):
