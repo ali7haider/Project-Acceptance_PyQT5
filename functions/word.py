@@ -49,7 +49,9 @@ def acceptance_no_deficiencies(self, variation, project, path, date, item, item2
 
 def rejected_word(self, variation, project, path, date, item, item2):
     # Define the temporary directory path
-    temp_dir = os.path.join(path, "Templates", "Word")  # Create Temp folder path relative to the script directory
+    path2 = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    temp_dir = os.path.join(path2, "Templates", "Word")  # Create Temp folder path relative to the script directory
 
     # Build the template file path dynamically using os.path.join
     template_filename = f"{variation}-{project}-{item}-{item2} Letter-Template.docx"

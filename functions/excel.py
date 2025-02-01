@@ -374,7 +374,11 @@ def kill_excel():
     for process in psutil.process_iter():
         if process.name().lower() == "excel.exe":
             process.kill()
-
+def kill_word():
+    """Forcefully terminate all running instances of Microsoft Word."""
+    for process in psutil.process_iter():
+        if process.name().lower() == "winword.exe":  # Word process name
+            process.kill()
 
 def exportToExcel(self, table):
     columnHeaders = []
@@ -398,6 +402,7 @@ def exportToExcel(self, table):
 def pandas2word(self):
     # Ensure Excel processes are killed
     kill_excel()
+    kill_word()
 
     # Get the current working directory (path to the script)
     path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -607,7 +612,9 @@ def pandas2word(self):
                 writer.save()
                 
                 # writer.close()
-                word_sol(self,excel_filepath)
+                create_pdf(self,temp_excel_filepath)
+
+                # word_sol(self,excel_filepath)
                 location = self.directory_code 
                 word.acceptance_no_deficiencies(self, self.area, self.cip_dev, location,self.getchoice.text, self.getchoice.item2, self.getchoice.item)
             else:
@@ -691,7 +698,9 @@ def pandas2word(self):
                 writer.save()
                 
                 # writer.close()
-                word_sol(self,excel_filepath)
+                create_pdf(self,temp_excel_filepath)
+
+                # word_sol(self,excel_filepath)
                 location = self.directory_code 
                 word.rejected_word(self, self.area, self.cip_dev, location,self.getchoice.text, self.getchoice.item2, self.getchoice.item)
             else:
@@ -775,7 +784,9 @@ def pandas2word(self):
                 writer.save()
                 
                 # writer.close()
-                word_sol(self,excel_filepath)
+                create_pdf(self,temp_excel_filepath)
+
+                # word_sol(self,excel_filepath)
                 location = self.directory_code 
                 word.rejected_word(self, self.area, self.cip_dev, location,self.getchoice.text, self.getchoice.item2, self.getchoice.item)
             else:
@@ -840,37 +851,90 @@ def variation(self):
     
 
 def word_sol(self, name):
-    path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-    # Define the temporary directory path
-    temp_dir = os.path.join(path, "Temp")  # Create Temp folder path relative to the script directory
-    # Define the Excel file paths
-    original = os.path.join(temp_dir, "test.docx")
-    target = os.path.join(temp_dir, "test_copy.docx")
-    final_pdf_path = self.directory_code + "/" + self.area + "-" +self.getchoice.text + "-" + self.cip_dev + "-" +self.getchoice.item2 + "-SQ" + self.planfile_entry.text() + "(Asset List)"+ ".pdf"
-    print("FINAL PATH "+ final_pdf_path)
-    shutil.copyfile(original, target)
-    rowcount = self.tableview.model().rowCount()
-    colcount = self.tableview.model().columnCount()
-    excel = client.Dispatch("Excel.Application")
-    word = client.Dispatch("Word.Application")
-    doc = word.Documents.Open(target)
-    book = excel.Workbooks.Open(name)
-    sheet = book.Worksheets[0]
-    sheet.Columns.WrapText = True
-    sheet.PageSetup.Orientation = 2
+    """Converts an Excel table to a Word document and saves it as a PDF."""
     
-    sheet.Range(sheet.Cells(1,2),sheet.Cells(rowcount+2,colcount+1)).Copy()      # Selected the table I need to copy
-    wdRange = doc.Content
-    wdRange.Collapse(1) #start of the document, use 0 for end of the document
-    wdRange.PasteExcelTable(False, False, False)
-    book.Save()
-    book.Close()
-    excel.Quit()
-    doc.SaveAs(final_pdf_path , FileFormat=17)
-    doc.Close()
-    word.Quit()
+    pythoncom.CoInitialize()  # Initialize COM
+
+    try:
+        path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+        # Define the temporary directory path
+        temp_dir = os.path.join(path, "Temp")
+        
+        # Define the file paths
+        original = os.path.join(temp_dir, "test.docx")
+        target = os.path.join(temp_dir, "test_copy.docx")
+        
+        # Construct the final PDF file name
+        final_pdf_path = os.path.join(
+            self.directory_code,
+            f"{self.area}-{self.getchoice.text}-{self.cip_dev}-{self.getchoice.item2}-SQ{self.planfile_entry.text()}(Asset List).pdf"
+        )
+
+        print("FINAL PATH:", final_pdf_path)
+
+        # Ensure template exists
+        if not os.path.exists(original):
+            raise FileNotFoundError(f"Template file not found: {original}")
+
+        # Copy template
+        shutil.copyfile(original, target)
+
+        # Initialize Word
+        word = client.Dispatch("Word.Application")
+        word.Visible = False  # Keep Word hidden
+        doc = word.Documents.Open(target)
+
+        # Open Excel
+        excel = client.Dispatch("Excel.Application")
+        book = excel.Workbooks.Open(name)
+        sheet = book.Worksheets[0]
+
+        # Get row and column count from the table
+        rowcount = self.tableview.model().rowCount()
+        colcount = self.tableview.model().columnCount()
+
+        # Ensure text wraps properly
+        sheet.Columns.WrapText = True
+        sheet.PageSetup.Orientation = 2  # Set landscape mode if needed
+
+        # Copy the selected table range
+        sheet.Range(sheet.Cells(1, 2), sheet.Cells(rowcount + 2, colcount + 1)).Copy()
+
+        # Paste into Word
+        wdRange = doc.Content
+        wdRange.Collapse(1)  # Move to the start
+        wdRange.PasteExcelTable(False, False, False)
+
+        # Save changes in Word
+        doc.Save()  # Save before exporting
+
+        # Convert to PDF (Correct SaveAs syntax)
+        doc.SaveAs(final_pdf_path, FileFormat=17)  
+
+        print(f"PDF successfully created: {final_pdf_path}")
+
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    finally:
+        # Ensure Word and Excel are properly closed
+        try:
+            if doc:
+                doc.Close(SaveChanges=False)
+            if word:
+                word.Quit()
+            if book:
+                book.Close(SaveChanges=False)
+            if excel:
+                excel.Application.Quit()
+        except Exception as cleanup_error:
+            print(f"Error while closing applications: {cleanup_error}")
+
+        pythoncom.CoUninitialize()  # Uninitialize COM
 
 def create_pdf(self, name2):
     try:
