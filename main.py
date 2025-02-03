@@ -215,10 +215,13 @@ class UI_Main_Window(object):
         self.warranty_btn.setEnabled(True)
         self.warranty_btn.setGeometry(QtCore.QRect(30, 220, 91, 24))
         self.warranty_btn.setObjectName("warranty_btn")
-
+        import os
         # Picture
         label = QtWidgets.QLabel(self.central_widget)
-        pixmap = QtGui.QPixmap('imgs/OCULogo.jpg')
+        parent_dir = os.path.dirname(os.path.abspath(__file__))  # Parent script path
+        imgPath = os.path.join(parent_dir, "imgs", "OCULogo.jpg")
+        
+        pixmap = QtGui.QPixmap(imgPath)
         label.setPixmap(pixmap)
         xpos = screen_size_x - 225
         label.setGeometry(QtCore.QRect(xpos//2 -100, 10, screen_size_x - 225, screen_size_y - 100))

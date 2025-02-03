@@ -284,90 +284,93 @@ def showError(message):
     msg.setWindowTitle("Error")
     msg.exec_()
 
+import os
+import json
+import configparser
+
 def set_delegates(self, table):
+    try:
+        # Get the directory of the script and navigate to the config folder
+        parent_dir = os.path.dirname(os.path.abspath(__file__))  # Parent script path
+        config_path = os.path.join(parent_dir, "config", "delegates.properties")
+        
+        # Read configuration file
+        config = configparser.RawConfigParser()
+        if not os.path.exists(config_path):
+            raise FileNotFoundError(f"Configuration file not found: {config_path}")
+        
+        config.read(config_path)
 
-    config = configparser.RawConfigParser()
-    config.read(
-        "config\delegates.properties")
+        # Load values safely with try-except
+        try:
+            approved_cctv_list = json.loads(config.get("GRAVITY", "approved_cctv"))
+            approved_cctv_delegate.setItems(approved_cctv_list)
 
-    approved_cctv = config.get("GRAVITY", "approved_cctv")
-    approved_cctv_list = json.loads(approved_cctv)
-    approved_cctv_delegate.setItems(approved_cctv_list)
+            vendor_surveyor_list = json.loads(config.get("GRAVITY", "oc_surveyor"))
+            vendor.setItems(vendor_surveyor_list)
 
-    vendor_surveyor = config.get("GRAVITY", "oc_surveyor")
-    vendor_surveyor_list = json.loads(vendor_surveyor)
-    vendor.setItems(vendor_surveyor_list)
+            reviewer_list = json.loads(config.get("GRAVITY", "reviewer"))
+            reviewer_delegate.setItems(reviewer_list)
 
-    reviewer = config.get("GRAVITY", "reviewer")
-    reviewer_list = json.loads(reviewer)
-    reviewer_delegate.setItems(reviewer_list)
+            gravity_structure_list = json.loads(config.get("GRAVITY", "structure"))
+            structure_delegate.setItems(gravity_structure_list)
 
-    gravity_structure = config.get("GRAVITY", "structure")
-    gravity_structure_list = json.loads(gravity_structure)
-    structure_delegate.setItems(gravity_structure_list)
+            action_list = json.loads(config.get("GRAVITY", "action"))
+            action_delegate.setItems(action_list)
 
-    action = config.get("GRAVITY", "action")
-    action_list = json.loads(action)
-    action_delegate.setItems(action_list)
+            corrective_list = json.loads(config.get("GRAVITY", "corrective"))
+            corrective_delegate.setItems(corrective_list)
 
-    corrective = config.get("GRAVITY", "corrective")
-    corrective_list = json.loads(corrective)
-    corrective_delegate.setItems(corrective_list)
+            pressure_structure_vals_list = json.loads(config.get("PRESSURE", "structure"))
+            structure_delegate.setItems(pressure_structure_vals_list)
 
-    pressure_structure_vals = config.get("PRESSURE", "structure")
-    pressure_structure_vals_list = json.loads(pressure_structure_vals)
-    structure_delegate.setItems(pressure_structure_vals_list)
+            category_list = json.loads(config.get("PRESSURE", "category"))
+            category_delegate.setItems(category_list)
 
-    pressure_category_val = config.get("PRESSURE", "category")
-    category_list = json.loads(pressure_category_val)
-    category_delegate.setItems(category_list)
+            pump_value_list = json.loads(config.get("PUMP", "category"))
+            category_pump_delegate.setItems(pump_value_list)
 
-    pump_values = config.get("PUMP", "category")
-    pump_value_list = json.loads(pump_values)
-    category_pump_delegate.setItems(pump_value_list)
+        except configparser.NoOptionError as e:
+            print(f"Error reading config value: {e}")
+            QMessageBox.critical(None, "Error", f"An error occurred:\n{str(e)}")
 
-    if self.code == 1:
-        table.setItemDelegateForColumn(0, category_pump_delegate)
-        table.setItemDelegateForColumn(4, options_delegate)
-        table.setItemDelegateForColumn(6, options_delegate)
 
-    if self.code == 2:
-        table.setItemDelegateForColumn(0, category_pump_delegate)
-        table.setItemDelegateForColumn(4, options_delegate)
-        table.setItemDelegateForColumn(6, options_delegate)
+        # Assign delegates based on `self.code`
+        if self.code in [1, 2]:
+            table.setItemDelegateForColumn(0, category_pump_delegate)
+            table.setItemDelegateForColumn(4, options_delegate)
+            table.setItemDelegateForColumn(6, options_delegate)
 
-    if self.code == 3:
-        table.setItemDelegateForColumn(4, structure_delegate)
-        table.setItemDelegateForColumn(5, action_delegate)
-        table.setItemDelegateForColumn(6, approved_cctv_delegate)
-        table.setItemDelegateForColumn(7, options_delegate)
-        table.setItemDelegateForColumn(8, vendor)
-        table.setItemDelegateForColumn(9, reviewer_delegate)
-        table.setItemDelegateForColumn(10, corrective_delegate)
-        table.setItemDelegateForColumn(12, options_delegate)
-        # table.setItemDelegateForColumn(14, vendor)
-        table.setItemDelegateForColumn(14, reviewer_delegate)
-        table.setItemDelegateForColumn(15, corrective_delegate)
+        elif self.code == 3:
+            table.setItemDelegateForColumn(4, structure_delegate)
+            table.setItemDelegateForColumn(5, action_delegate)
+            table.setItemDelegateForColumn(6, approved_cctv_delegate)
+            table.setItemDelegateForColumn(7, options_delegate)
+            table.setItemDelegateForColumn(8, vendor)
+            table.setItemDelegateForColumn(9, reviewer_delegate)
+            table.setItemDelegateForColumn(10, corrective_delegate)
+            table.setItemDelegateForColumn(12, options_delegate)
+            table.setItemDelegateForColumn(14, reviewer_delegate)
+            table.setItemDelegateForColumn(15, corrective_delegate)
 
-    if self.code == 4:
-        table.setItemDelegateForColumn(2, approved_cctv_delegate)
-        table.setItemDelegateForColumn(3, options_delegate)
-        table.setItemDelegateForColumn(5, reviewer_delegate)
-        table.setItemDelegateForColumn(7, options_delegate)
-        table.setItemDelegateForColumn(8, vendor)
-        table.setItemDelegateForColumn(9, reviewer_delegate)
+        elif self.code == 4:
+            table.setItemDelegateForColumn(2, approved_cctv_delegate)
+            table.setItemDelegateForColumn(3, options_delegate)
+            table.setItemDelegateForColumn(5, reviewer_delegate)
+            table.setItemDelegateForColumn(7, options_delegate)
+            table.setItemDelegateForColumn(8, vendor)
+            table.setItemDelegateForColumn(9, reviewer_delegate)
 
-    if self.code == 5:
-        table.setItemDelegateForColumn(0, category_delegate)
-        table.setItemDelegateForColumn(5, structure_delegate)
-        table.setItemDelegateForColumn(6, options_delegate)
-        table.setItemDelegateForColumn(8, options_delegate)
+        elif self.code in [5, 6]:
+            table.setItemDelegateForColumn(0, category_delegate)
+            table.setItemDelegateForColumn(5, structure_delegate)
+            table.setItemDelegateForColumn(6, options_delegate)
+            table.setItemDelegateForColumn(8, options_delegate)
 
-    if self.code == 6:
-        table.setItemDelegateForColumn(0, category_delegate)
-        table.setItemDelegateForColumn(5, structure_delegate)
-        table.setItemDelegateForColumn(6, options_delegate)
-        table.setItemDelegateForColumn(8, options_delegate)
+    except Exception as e:
+        print(f"An error occurred in set_delegates: {e}")
+        QMessageBox.critical(None, "Error", f"An error occurred:\n{str(e)}")
+
 
 # Kill all running Excel instances
 def kill_excel():
